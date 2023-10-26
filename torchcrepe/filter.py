@@ -7,7 +7,7 @@ from torch.nn import functional as F
 ###############################################################################
 
 
-def mean(signals, win_length=9):
+def mean(signals, win_length: int=9):
     """Averave filtering for signals containing nan values
 
     Arguments
@@ -56,7 +56,7 @@ def mean(signals, win_length=9):
     return avg_pooled.squeeze(1)
 
 
-def median(signals, win_length):
+def median(signals, win_length:int):
     """Median filtering for signals containing nan values
 
     Arguments
@@ -77,7 +77,7 @@ def median(signals, win_length):
     padding = win_length // 2
 
     x = F.pad(masked_x, (padding, padding), mode="reflect")
-    mask = F.pad(mask.float(), (padding, padding), mode="constant", value=0)
+    mask = F.pad(mask.float(), (padding, padding), mode="constant", value=0.0)
 
     x = x.unfold(2, win_length, 1)
     mask = mask.unfold(2, win_length, 1)
@@ -86,7 +86,7 @@ def median(signals, win_length):
     mask = mask.contiguous().view(mask.size()[:3] + (-1,))
 
     # Combine the mask with the input tensor
-    x_masked = torch.where(mask.bool(), x.double(), float("inf")).to(x)
+    x_masked = torch.where(mask.to(dtype=torch.bool), x.to(dtype=torch.double), float("inf")).to(x)
 
     # Sort the masked tensor along the last dimension
     x_sorted, _ = torch.sort(x_masked, dim=-1)
